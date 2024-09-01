@@ -229,7 +229,7 @@ The Top three features that most impact the customer churn feature are:
 #### Conclusion
 
 * Overall performance of the Random forest is better compared to the logistic regression and decision tree classifiers.
-* The key metric, precision, has significantly improved but is at a moderate score of 0.794. The model is incorrectly classifying negative instances as positive.
+* Through hyperparameter tuning, the overall performance of the model has improved now with a recall 0.752 and precision of 0.817.
 ### Models Comparison
 #### ROC Curve and AUC 
 
