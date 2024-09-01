@@ -1,5 +1,4 @@
 # SyriaTel-Customer-Churn-Classifier
-# SyriaTel Customer Churn Classifier
 ### Overview
 Customer acquisition is very costly to businesses, especially in the telecom industry, therefore customer retention is paramount for a business to be successful. Finding ways to retain existing customers is more cost effective than acquiring new customers. This project aims to build a classification model that will predict whether a customer will soon stop doing business with SyriaTel, and suggest measures to reduce customer churn rate.
 
@@ -109,7 +108,7 @@ The customer churn for those without a voice mail plan is higher than the custom
 From the chart above, the most significant numeric value on customer churn is customer service calls. Customers with more service call are more likely to discontinue their service with SyriaTel.
 ### Correlation Heatmap for Numeric Features
 
-![Sample Plot](images/heatmap.png)
+![Sample Plot](./Images/heatmap.png)
 
 
 Some of the numeric features have perfect correlation since the values in one column are derived from the other column:
@@ -136,11 +135,11 @@ I've use Minmax scaler to scale the numeric data in the dataset then joined the 
 ### Addressing Class Imbalance
 The binary classes in the target feature (churn) are not evenly distributed as illustrated below.
 
-![Sample Plot](images/churn-imbala.png)
+![Sample Plot](./Images/churn-imbala.png)
 
 * 14.5% of the data in the churn feature is true, this shows class imbalance which I will address using SMOTE, an oversampling technique.
  
- ![Sample Plot](images/churn_bala.png)
+ ![Sample Plot](./Images/churn_bala.png)
 
 ## Modelling
 ***
@@ -153,7 +152,7 @@ The binary classes in the target feature (churn) are not evenly distributed as i
 
 #### Model Evaluation
 
-![Sample Plot](images/LR_score.png)
+![Sample Plot](./Images/LR_score.png)
 
 #### Observations
 
@@ -173,7 +172,7 @@ The binary classes in the target feature (churn) are not evenly distributed as i
 
 #### Model Evaluation
 
-![Sample Plot](images/DT_score.png)
+![Sample Plot](./Images/DT_score.png)
 
 #### Observations
 
@@ -193,7 +192,7 @@ The binary classes in the target feature (churn) are not evenly distributed as i
 
 #### Model Evaluation
 
-![Sample Plot](images/RF_score.png)
+![Sample Plot](./Images/RF_score.png)
 
 #### Observations
 
@@ -204,7 +203,7 @@ The binary classes in the target feature (churn) are not evenly distributed as i
 #### Hyperparameter Tuning of Random Forest Classifier
 * Classifier models can be optimized by tweaking the classifier's parameters. To improve the performance of the random forest classifier, I've changed some parameters.
 
-![Sample Plot](images/tuned_score.png)
+![Sample Plot](./Images/tuned_score.png)
 
 
 #### Observations
@@ -217,7 +216,7 @@ One of the most important parameters to improve precision score is class_weight,
 * **Precision:** The precision score has improved from 0.794 to 0.817.
 #### Feature Importance
 
-![Sample Plot](images/ftr_imp.png)
+![Sample Plot](./Images/ftr_imp.png)
 
 
 #### Observations : Feature Importance
@@ -237,7 +236,7 @@ The Top three features that most impact the customer churn feature are:
 * ROC curve illustrates the true positive rate (recall) against the false positive rate of a classifier. AUC represents a measure of the overall ability of the classifier to distinguish between positive and negative classes.
 * The higher the AUC, the better the performance. The best performing model will have an ROC that hugs the upper left corner of the graph, illustrating a high true positive rate and low false positive rate.
 
-![Sample Plot](images/ROC-AUC.png)
+![Sample Plot](./Images/ROC-AUC.png)
 
 
 * From the ROC and AUC value illustrated above, the best performing model is the Random Forest Classifier. This model will best predict the customers about to leave the business.
