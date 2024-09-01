@@ -273,15 +273,3 @@ The Top three features that most impact the customer churn feature are:
 3. **Use Data-Driven Insights to Target Dissatisfied Customers:**
    - Incorporate insights from predictive data analysis to come up with targeted campaigns for highly dissatisfied customers about to churn
 
-### Repository Structure
-
-
-├── README.md                                <- The top-level README for reviewers of this project
-|
-├── index.ipynb                              <- Narrative documentation of analysis in Jupyter Notebook
-|
-├── presentation.pdf                         <- PDF version of project presentation
-|
-├──/Data/SyriaTel_Customer_Churn_data.csv    <- Dataset used in the analysis 
-|
-└──/Images                                   <- Chart visualizations
