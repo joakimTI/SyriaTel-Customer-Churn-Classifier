@@ -91,6 +91,8 @@ This section analyzes the impact of the categorical features(state, area code, i
 ![Sample Plot](./Images/cat2.png)
 ![Sample Plot](./Images/cat3.png)
 ![Sample Plot](./Images/cat4.png)
+
+
 **Observation:**
 
  From the visualizations above, 42% of the customers with an international plan left SyriaTel in comparison to 11% of those that don't have an international plan. Syriatel should focus on boosting international calls to improve customer satisfaction for those with international plans.
@@ -99,27 +101,17 @@ The customer churn for those without a voice mail plan is higher than the custom
 #### Numeric Features Analysis
 #### Analysis 2: Explore the Impact of Numeric Features on Customer Churn:
 
-import matplotlib.pyplot as plt
-summed_data = df.groupby('churn')[numerical_cols].sum()
-percentage_data = summed_data.div(summed_data.sum(axis=0), axis=1) * 100
-percentage_data.T.plot(kind='bar', figsize=(12, 8))
-plt.title('Sum of Numerical Features Grouped by Churn')
-plt.ylabel('Sum')
-plt.xlabel('Numerical Features')
-plt.xticks(rotation=45)
-plt.legend(title='Churn', labels=['No Churn', 'Churn'])
-plt.show()
-print("Percentage distribution of numerical columns grouped by churn:")
-print(percentage_data)
+![Sample Plot](./Images/num1.png)
+
+
 **Observation:**
 
 From the chart above, the most significant numeric value on customer churn is customer service calls. Customers with more service call are more likely to discontinue their service with SyriaTel.
 ### Correlation Heatmap for Numeric Features
 
-plt.subplots(figsize=(15,12))
-sns.heatmap(df[numerical_cols].corr(), annot=True, cmap='coolwarm')
-plt.xticks(rotation=90)
-plt.show()
+![Sample Plot](images/heatmap.png)
+
+
 Some of the numeric features have perfect correlation since the values in one column are derived from the other column:
 
 * Total day charge and total day minutes.
@@ -128,71 +120,27 @@ Some of the numeric features have perfect correlation since the values in one co
 * Total intl charge and total intl minutes. 
 
 I'll drop the columns with minutes and remain with the columns with charges.
-df.drop(['total intl minutes', 'total eve minutes', 'total night minutes', 'total day minutes'], axis=1, inplace=True)
-df.shape
-### Train-Test Split 
-# Split the data into training and testing data at 80,20 ratio
-df['churn'] = df['churn'].map({True: 1, False: 0}).astype('int') 
-X = df.drop(['churn'], axis=1)
-y = df['churn']
 
-X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+### Train-Test Split 
+#### Split the data into training and testing data at 80,20 ratio
+
+
+
 
 ### Preprocessing
 I've used onehotencoder to convert each categorical value into a new binary column with 0 or 1 for each unique value.
-X_train_categorical = X_train[['state','area code','international plan','voice mail plan']]
-X_test_categorical = X_test[['state','area code','international plan','voice mail plan']]
-ohe = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-ohe.fit(X_train_categorical)
-def oheEncoder(X_categorical):
-    # Create new column names with prefixes
-    new_column_names = []
-    for col, categories in zip(X_categorical.columns, ohe.categories_):
-        new_column_names.extend([f"{col}_{category}" for category in categories])
 
-    # Create the DataFrame with the new column names
-    X_ohe = pd.DataFrame(
-        ohe.transform(X_categorical),
-        index=X_categorical.index,
-        columns=new_column_names
-    )
-    return X_ohe
-X_train_ohe = oheEncoder(X_train_categorical)
-X_test_ohe = oheEncoder(X_test_categorical)
-X_train_ohe
 ### Normalization
-X_train_numeric = X_train.drop(['state','area code','international plan','voice mail plan'], axis=1)
-X_test_numeric = X_test.drop(['state','area code','international plan','voice mail plan'], axis=1)
-scaler = MinMaxScaler()
-scaler.fit(X_train_numeric)
-def minmax_scaler(X_numeric):    
-    X_scaled = pd.DataFrame(
-        scaler.transform(X_numeric),
-        # index is important to ensure we can concatenate with other columns
-        index=X_numeric.index,
-        columns=X_numeric.columns
-    )
-    return X_scaled
-X_train_scaled = minmax_scaler(X_train_numeric)
-X_test_scaled = minmax_scaler(X_test_numeric)
-X_test_scaled
-# Join the numeric and categorical features to one dataframe.
-X_train_full = pd.concat([X_train_scaled, X_train_ohe], axis=1)
-X_test_full = pd.concat([X_test_scaled, X_test_ohe], axis=1)
+I've use Minmax scaler to scale the numeric data in the dataset then joined the numeric and categorical data.
+
 ### Addressing Class Imbalance
 The binary classes in the target feature (churn) are not evenly distributed as illustrated below.
-# Countplot of churn feature
-print(df.churn.value_counts(normalize=True))
-sns.countplot(data=df, x='churn')
-plt.show()
+
+![Sample Plot](images/churn-imbala.png)
+
 * 14.5% of the data in the churn feature is true, this shows class imbalance which I will address using SMOTE, an oversampling technique.
-smote = SMOTE()
-X_train_full.columns = [str(col) for col in X_train_full.columns]
-y_train.name = 'churn'
-X_train_resampled, y_train_resampled = smote.fit_resample(X_train_full, y_train)
-print(y_train_resampled.value_counts(normalize=True))
-sns.countplot(data=y_train_resampled, x=y_train_resampled)
-plt.show()
+ 
+ ![Sample Plot](images/churn_bala.png)
 
 ## Modelling
 ***
@@ -202,23 +150,11 @@ plt.show()
 * This will serve as the base model.
 
 
-# Create a LogisticRegression object, fit the data and predict the target variable
-log_reg = LogisticRegression(fit_intercept=False, solver='liblinear', C=1e12, random_state=42)
-log_reg.fit(X_train_resampled, y_train_resampled)
-y_pred_log = log_reg.predict(X_test_full)
-#### Model Evaluation
-print(classification_report(y_test, y_pred_log, target_names=['False', 'True']))
 
-print('Accuracy score for testing set: ',round(accuracy_score(y_test,y_pred_log),3))
-print('F1 score for testing set: ',round(f1_score(y_test,y_pred_log),3))
-print('Recall score for testing set: ',round(recall_score(y_test,y_pred_log),3))
-print('Precision score for testing set: ',round(precision_score(y_test,y_pred_log),3))
-cm_lr = confusion_matrix(y_test, y_pred_log)
-f, ax= plt.subplots(1,1,figsize=(7,5))
-sns.heatmap(cm_lr, annot=True, cmap='Blues', fmt='g', ax=ax)
-ax.set_xlabel('Predicted Labels'); ax.set_ylabel('True Labels') ; ax.set_title('Logistic Regression Confusion Matrix')
-ax.xaxis.set_ticklabels(['0', '1']) ; ax.yaxis.set_ticklabels(['0', '1'])
-plt.show();
+#### Model Evaluation
+
+![Sample Plot](images/LR_score.png)
+
 #### Observations
 
 * **Accuracy:** The model correctly predicted 78.7% of the instances in the testing set. This is a decent overall performance.
@@ -234,23 +170,11 @@ plt.show();
 
 * Decision tree classifier is a supervised machine learning algorithm that works by splitting the data into subsets based on the value of input features.
 * Each node represents a decision rule, and each branch represents an outcome of that rule.
-# Create a DecisionTreeClassifier object, fit the data and predict the target variable
-decision_tree = DecisionTreeClassifier(random_state=42)
-decision_tree.fit(X_train_resampled,y_train_resampled)
-y_pred_dt = decision_tree.predict(X_test_full)
-#### Model Evaluation
-print(classification_report(y_test, y_pred_dt, target_names=['False', 'True']))
 
-print('Accuracy score for testing set: ',round(accuracy_score(y_test,y_pred_dt),3))
-print('F1 score for testing set: ',round(f1_score(y_test,y_pred_dt),3))
-print('Recall score for testing set: ',round(recall_score(y_test,y_pred_dt),3))
-print('Precision score for testing set: ',round(precision_score(y_test,y_pred_dt),3))
-cm_lr = confusion_matrix(y_test, y_pred_dt)
-f, ax= plt.subplots(1,1,figsize=(7,5))
-sns.heatmap(cm_lr, annot=True, cmap='Blues', fmt='g', ax=ax)
-ax.set_xlabel('Predicted Labels'); ax.set_ylabel('True Labels') ; ax.set_title('Decision Tree Confusion Matrix')
-ax.xaxis.set_ticklabels(['0', '1']) ; ax.yaxis.set_ticklabels(['0', '1'])
-plt.show();
+#### Model Evaluation
+
+![Sample Plot](images/DT_score.png)
+
 #### Observations
 
 * **Accuracy:** The model correctly predicted 85% of the instances in the testing set. This is a good overall performance, and improved compared to logistic regression model.
@@ -266,23 +190,11 @@ plt.show();
 * Random forest is a supervised machine learning algorithm that creates a set of decision trees from a randomly selected subset of the training data.
 * Random forest is best suited for handling large, complex datasets and providing insight into feature importance.
 
-# Create a DecisionTreeClassifier object, fit the data and predict the target variable
-rf_model = RandomForestClassifier(random_state=42) 
-rf_model.fit(X_train_resampled,y_train_resampled) 
-y_pred_rf = rf_model.predict(X_test_full)
-#### Model Evaluation
-print(classification_report(y_test, y_pred_rf, target_names=['False', 'True']))
 
-print('Accuracy score for testing set: ',round(accuracy_score(y_test,y_pred_rf),3))
-print('F1 score for testing set: ',round(f1_score(y_test,y_pred_rf),3))
-print('Recall score for testing set: ',round(recall_score(y_test,y_pred_rf),3))
-print('Precision score for testing set: ',round(precision_score(y_test,y_pred_rf),3))
-cm_rf = confusion_matrix(y_test, y_pred_rf)
-f, ax= plt.subplots(1,1,figsize=(7,5))
-sns.heatmap(cm_rf, annot=True, cmap='Blues', fmt='g', ax=ax)
-ax.set_xlabel('Predicted Labels'); ax.set_ylabel('True Labels') ; ax.set_title('Random Forest Confusion Matrix')
-ax.xaxis.set_ticklabels(['0', '1']) ; ax.yaxis.set_ticklabels(['0', '1'])
-plt.show();
+#### Model Evaluation
+
+![Sample Plot](images/RF_score.png)
+
 #### Observations
 
 * **Accuracy:** The model correctly predicted 93.1% of the instances in the testing set, which is an excellent overall performance, and an improvement compared to the Decision Tree model.
@@ -291,20 +203,10 @@ plt.show();
 * **Precision:** The precision score of 0.802 is significantly improved, but still indicates that the model might incorrectly classify some negative instances as positive.
 #### Hyperparameter Tuning of Random Forest Classifier
 * Classifier models can be optimized by tweaking the classifier's parameters. To improve the performance of the random forest classifier, I've changed some parameters.
-rf_model_tuned = RandomForestClassifier(criterion='entropy', random_state=42, class_weight='balanced')
-rf_model_tuned.fit(X_train_resampled,y_train_resampled)
-y_pred_tuned = rf_model_tuned.predict(X_test_full)
 
-print('Accuracy score for testing set: ',round(accuracy_score(y_test,y_pred_tuned),3))
-print('F1 score for testing set: ',round(f1_score(y_test,y_pred_tuned),3))
-print('Recall score for testing set: ',round(recall_score(y_test,y_pred_tuned),3))
-print('Precision score for testing set: ',round(precision_score(y_test,y_pred_tuned),3))
-cm_rf = confusion_matrix(y_test, y_pred_tuned)
-f, ax= plt.subplots(1,1,figsize=(7,5))
-sns.heatmap(cm_rf, annot=True, cmap='Blues', fmt='g', ax=ax)
-ax.set_xlabel('Predicted Labels'); ax.set_ylabel('True Labels') ; ax.set_title('Random Forest Confusion Matrix')
-ax.xaxis.set_ticklabels(['0', '1']) ; ax.yaxis.set_ticklabels(['0', '1'])
-plt.show();
+![Sample Plot](images/tuned_score.png)
+
+
 #### Observations
 
 One of the most important parameters to improve precision score is class_weight, which addresses class imbalance. 
@@ -314,17 +216,17 @@ One of the most important parameters to improve precision score is class_weight,
 * **Recall:** The model's Recall has improved to 0.752.
 * **Precision:** The precision score has improved from 0.794 to 0.817.
 #### Feature Importance
-# provides a clear visual representation of the features that contribute most to the RF model's predictions
-feature_importance =pd.DataFrame({"Importance": rf_model.feature_importances_*100},index = X_train_resampled.columns)
-feature_importance.sort_values(by = "Importance", axis = 0, ascending = True).tail(15).plot(kind ="barh", color = "g",figsize=(9, 5))
-plt.title("Feature Importance Levels");
-plt.show()
+
+![Sample Plot](images/ftr_imp.png)
+
+
 #### Observations : Feature Importance
 
 The Top three features that most impact the customer churn feature are:
 1. Total day charge
 2. Customer Service calls
 3. Total International calls
+
 #### Conclusion
 
 * Overall performance of the Random forest is better compared to the logistic regression and decision tree classifiers.
@@ -335,47 +237,9 @@ The Top three features that most impact the customer churn feature are:
 * ROC curve illustrates the true positive rate (recall) against the false positive rate of a classifier. AUC represents a measure of the overall ability of the classifier to distinguish between positive and negative classes.
 * The higher the AUC, the better the performance. The best performing model will have an ROC that hugs the upper left corner of the graph, illustrating a high true positive rate and low false positive rate.
 
-classifiers = [LogisticRegression(), RandomForestClassifier(), DecisionTreeClassifier()]
+![Sample Plot](images/ROC-AUC.png)
 
 
-# Define a result table as a DataFrame
-result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
-
-# Train the models and record the results
-for cls in classifiers:
-    model = cls.fit(X_train_resampled, y_train_resampled)
-    yproba = model.predict_proba(X_test_full)[::,1]
-    
-    fpr, tpr, thresholds = roc_curve(y_test,  yproba)
-    auc = roc_auc_score(y_test, yproba)
-    
-    result_table = result_table.append({'classifiers':cls.__class__.__name__,
-                                        'fpr':fpr, 
-                                        'tpr':tpr, 
-                                        'auc':auc}, ignore_index=True)
-
-# Set name of the classifiers as index labels
-result_table.set_index('classifiers', inplace=True)
-
-fig = plt.figure(figsize=(8,6))
-
-for i in result_table.index:
-    plt.plot(result_table.loc[i]['fpr'], 
-             result_table.loc[i]['tpr'], 
-             label="{}, AUC={:.3f}".format(i, result_table.loc[i]['auc']))
-    
-plt.plot([0,1], [0,1], color='orange', linestyle='--')
-
-plt.xticks(np.arange(0.0, 1.1, step=0.1))
-plt.xlabel("False Positive Rate", fontsize=15)
-
-plt.yticks(np.arange(0.0, 1.1, step=0.1))
-plt.ylabel("True Positive Rate", fontsize=15)
-
-plt.title('ROC Curve Analysis', fontweight='bold', fontsize=15)
-plt.legend(prop={'size':13}, loc='lower right')
-
-plt.show()
 * From the ROC and AUC value illustrated above, the best performing model is the Random Forest Classifier. This model will best predict the customers about to leave the business.
 ## CONCLUSION
 ### Objective 1: 
