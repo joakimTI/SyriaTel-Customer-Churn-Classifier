@@ -56,18 +56,10 @@ I've used the SyriaTel Customer Churn Dataset. The data represents details about
 * **total intl charge:** total amount of money the customer was charged by the Telecom company for international calls
 * **customer service calls:** number of calls the customer has made to customer service
 * **churn:** true if the customer terminated their contract, otherwise false
-# Gets the number of rows and columns in the dataset
-df.shape
-Dataset has 3333 rows and 21 columns
-Check the data type held by each column and number of non-null values
-# Check the data type held by each column and number of non-null values
-df.info()
-There are no null values in this dataset. Check for row duplicates below:
-# Checks for row duplicates
-df.duplicated().sum()
+
 ### Feature Selection
 For feature selection, I'll first divide the dataset features into continous and categorical features.
-df.nunique()
+
 #### Continuous Features:
 * account length
 * number vmail messages
@@ -90,39 +82,15 @@ df.nunique()
 * area code
 * international plan
 * voicemail plan
-# Create numeric & categorical lists
-numerical_cols = ['account length','number vmail messages','total day minutes','total day calls','total day charge',
-                'total eve minutes','total eve calls','total eve charge','total night minutes','total night calls',
-                'total night charge','total intl minutes','total intl calls','total intl charge','customer service calls']
-categorical_cols = ['state', 'area code','international plan','voice mail plan']
-Phone number is a unique value for all customers and won't add any value to the analysis, so drop that feature.
-df.drop(['phone number'], inplace=True, axis=1)
+
 #### Categorical Features Analysis
 #### Analysis 1: Explore the Impact of Categorical Features on Customer Churn:
 This section analyzes the impact of the categorical features(state, area code, international plan, voicemail plan) on the target feature (churn).
-# Check the distribution of values in the categorical features
-for col in categorical_cols:
-    if col == 'state':
-         continue
-    print(df[col].value_counts(normalize='index'))
-# Checks the distribution of customer churn in the categoric features.
-for col in categorical_cols:
-    if col == 'state':
-         continue
-    crosstab = pd.crosstab(df[col], df['churn'], normalize="index")
-    print(f"Distribution for {col}:")
-    print(crosstab)
-    print("\n")
-state_crosstab = pd.crosstab(df['state'], df['churn'], normalize="index")
-print(f"Distribution for State:")
-print(state_crosstab)
-# Visualization of customer churn in each categoric feature
-for col in categorical_cols:
-    crosstab = pd.crosstab(df[col], df['churn'])
-    crosstab.plot(kind='bar', stacked=True, figsize=(10, 6))
-    plt.title(f'Stacked Bar Chart of Churn within {col}')
-    plt.ylabel('Count')
-    plt.show()
+
+![Sample Plot](./Images/cat1.png)
+![Sample Plot](./Images/cat2.png)
+![Sample Plot](./Images/cat3.png)
+![Sample Plot](./Images/cat4.png)
 **Observation:**
 
  From the visualizations above, 42% of the customers with an international plan left SyriaTel in comparison to 11% of those that don't have an international plan. Syriatel should focus on boosting international calls to improve customer satisfaction for those with international plans.
